@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulgaria National Debt Clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid #f1c40f;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .clock-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .clock-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .clock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            color: #74b9ff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.5rem;
+        }
+        
+        .counter {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+            margin: 15px 0;
+            letter-spacing: 2px;
+            overflow: hidden;
+        }
+        
+        .counter-small {
+            font-size: 2rem;
+        }
+        
+        .label {
+            font-size: 1rem;
+            color: #dfe6e9;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        .trend-up {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .trend-down {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .trend-stable {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #f1c40f;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .last-updated {
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .flag {
+            height: 40px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 15px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .currency {
+            font-size: 1.5rem;
+            color: #74b9ff;
+        }
+        
+        @media (max-width: 768px) {
+            .clock-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .counter {
+                font-size: 2rem;
+            }
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f1c40f);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 1.5s ease-in-out;
+        }
+        
+        .euro-flag {
+            display: inline-block;
+            background: #003399;
+            color: #FFCC00;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <img src="https://flagcdn.com/w40/bg.png" class="flag" alt="Bulgaria Flag">
+                BULGARIA NATIONAL DEBT CLOCK
+            </h1>
+            <div class="subtitle">Real-time simulation of Bulgaria's national debt and economic indicators</div>
+        </div>
+        
+        <div class="clock-container">
+            <div class="clock-card">
+                <div class="card-title">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Total National Debt
+                </div>
+                <div class="counter" id="total-debt">42,158,926,407</div>
+                <div class="currency">BGN (Bulgarian Lev)</div>
+                <div class="label">
+                    <div>As of: <span id="current-date">April 2024</span></div>
+                    <div class="trend-indicator trend-up">
+                        <i class="fas fa-arrow-up"></i> Increasing by ~2.1M BGN daily
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="debt-progress" style="width: 74%"></div>
+                </div>
+                <div class="label">Debt-to-GDP ratio: 22.7% of 185.8B BGN GDP</div>
+            </div>
+            
+            <div class="clock-card">
+                <div class="card-title">
+                    <i class="fas fa-user"></i>
+                    Debt Per Citizen
+                </div>
+                <div class="counter counter-small" id="debt-per-person">6,427</div>
+                <div class="currency">BGN per person</div>
+                <div class="label">Based on population of 6.56 million</div>
+                <div class="trend-indicator trend-up">
+                    <i class="fas fa-arrow-up"></i> Increasing by ~0.32 BGN daily per person
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                </div>
+                <div class="label">Approx. €3,285 per citizen <span class="euro-flag">€</span></div>
+            </div>
+            
+            <div class="clock-card">
+                <div class="card-title">
+                    <i class="fas fa-briefcase"></i>
+                    Debt Per Taxpayer
+                </div>
+                <div class="counter counter-small" id="debt-per-taxpayer">11,845</div>
+                <div class="currency">BGN per taxpayer</div>
+                <div class="label">Based on 3.56 million taxpayers</div>
+                <div class="trend-indicator trend-up">
+                    <i class="fas fa-arrow-up"></i> Increasing by ~0.59 BGN daily per taxpayer
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 70%"></div>
+                </div>
+                <div class="label">Approx. €6,055 per taxpayer <span class="euro-flag">€</span></div>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">Government Debt</div>
+                <div class="stat-value" id="gov-debt">20.1%</div>
+                <div class="stat-label">of GDP (EU target: 60%)</div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-label">Budget Deficit</div>
+                <div class="stat-value" id="deficit">-2.3%</div>
+                <div class="stat-label">of GDP (EU target: -3%)</div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-label">Economic Growth</div>
+                <div class="stat-value" id="growth">1.8%</div>
+                <div class="stat-label">Annual GDP Growth (2024 est.)</div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-label">Inflation Rate</div>
+                <div class="stat-value" id="inflation">5.2%</div>
+                <div class="stat-label">Year-over-year (March 2024)</div>
+            </div>
+        </div>
+        
+        <div class="last-updated">
+            <p><i class="fas fa-sync-alt"></i> Clock updates every second with simulated real-time data</p>
+            <p>Note: This is a simulation based on Bulgaria's 2024 estimated economic data. Actual figures may vary.</p>
+            <p>Sources: Bulgarian Ministry of Finance, National Statistical Institute, Eurostat, IMF</p>
+            <p id="update-time">Last updated: </p>
+        </div>
+    </div>
+
+    <script>
+        // Base values (as of April 2024 estimates)
+        const baseDebt = 42158926407; // 42.16B BGN
+        const basePopulation = 6560000; // 6.56 million
+        const baseTaxpayers = 3560000; // 3.56 million
+        const dailyIncrease = 2100000; // 2.1M BGN daily increase
+        
+        // Debt per person and taxpayer calculations
+        let debtPerPerson = baseDebt / basePopulation;
+        let debtPerTaxpayer = baseDebt / baseTaxpayers;
+        
+        // Get DOM elements
+        const totalDebtElement = document.getElementById('total-debt');
+        const debtPerPersonElement = document.getElementById('debt-per-person');
+        const debtPerTaxpayerElement = document.getElementById('debt-per-taxpayer');
+        const updateTimeElement = document.getElementById('update-time');
+        
+        // Format numbers with commas
+        function formatNumber(num) {
+            return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Initialize clock with current time
+        function updateClock() {
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const millisecondsPassed = now.getTime() - startOfDay.getTime();
+            const secondsPassed = millisecondsPassed / 1000;
+            
+            // Calculate debt increase based on time passed today
+            const increase = (dailyIncrease / 86400) * secondsPassed;
+            const currentDebt = baseDebt + increase;
+            const currentDebtPerPerson = currentDebt / basePopulation;
+            const currentDebtPerTaxpayer = currentDebt / baseTaxpayers;
+            
+            // Update display
+            totalDebtElement.textContent = formatNumber(currentDebt);
+            debtPerPersonElement.textContent = formatNumber(currentDebtPerPerson);
+            debtPerTaxpayerElement.textContent = formatNumber(currentDebtPerTaxpayer);
+            
+            // Update timestamp
+            updateTimeElement.textContent = `Last updated: ${now.toLocaleString('en-US', { 
+                timeZone: 'Europe/Sofia',
+                hour12: false,
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            })} (Sofia Time)`;
+            
+            // Update the current date display
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+        
+        // Initialize and update every second
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // Add some random fluctuation to economic indicators for realism
+        function fluctuateIndicators() {
+            const indicators = ['gov-debt', 'deficit', 'growth', 'inflation'];
+            const baseValues = [20.1, -2.3, 1.8, 5.2];
+            
+            indicators.forEach((id, index) => {
+                const element = document.getElementById(id);
+                // Add small random fluctuation (±0.1%)
+                const fluctuation = (Math.random() - 0.5) * 0.2;
+                const newValue = baseValues[index] + fluctuation;
+                element.textContent = newValue.toFixed(1) + '%';
+            });
+            
+            // Schedule next fluctuation
+            setTimeout(fluctuateIndicators, 5000 + Math.random() * 10000);
+        }
+        
+        // Start indicator fluctuations
+        fluctuateIndicators();
+    </script>
+</body>
+</html>
